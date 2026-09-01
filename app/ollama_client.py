@@ -5,7 +5,7 @@ import json
 import httpx
 from pydantic import ValidationError
 
-from app.ports import ResponseModel
+from app.ports import LLMMessage, ResponseModel
 
 
 class OllamaError(RuntimeError):
@@ -39,7 +39,7 @@ class OllamaClient:
     async def generate_structured(
         self,
         *,
-        messages: list[dict[str, str]],
+        messages: list[LLMMessage],
         response_model: type[ResponseModel],
         temperature: float = 0.0,
     ) -> ResponseModel:

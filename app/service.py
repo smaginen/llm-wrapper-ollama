@@ -16,7 +16,8 @@ class LLMWrapper:
         self._max_history_messages = max_history_messages
 
     async def handle(self, request: WrapperRequest) -> WrapperResponse:
-        classification = await classify_intent(self._llm, request.message)
+        history = request.history[-self._max_history_messages :]
+        classification = await classify_intent(self._llm, request.message, history)
 
         if classification.intent is Intent.OFF_TOPIC:
             return WrapperResponse(
@@ -26,7 +27,6 @@ class LLMWrapper:
                 model=self._llm.model,
             )
 
-        history = request.history[-self._max_history_messages :]
         prompt = render_answer_prompt(
             intent=classification.intent,
             message=request.message,

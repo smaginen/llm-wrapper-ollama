@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from app.ports import StructuredLLM
-from app.schemas import IntentClassification
+from app.ports import LLMMessage, StructuredLLM
+from app.schemas import ChatMessage, IntentClassification
 
 CLASSIFIER_SYSTEM_PROMPT = """Ты маршрутизатор запросов учебного помощника.
 Выбери ровно один intent:
@@ -13,12 +13,20 @@ CLASSIFIER_SYSTEM_PROMPT = """Ты маршрутизатор запросов �
 """
 
 
-async def classify_intent(llm: StructuredLLM, message: str) -> IntentClassification:
+async def classify_intent(
+    llm: StructuredLLM,
+    message: str,
+    history: list[ChatMessage] | None = None,
+) -> IntentClassification:
+    context: list[LLMMessage] = [
+        {"role": "system", "content": CLASSIFIER_SYSTEM_PROMPT},
+    ]
+    context.extend(
+        {"role": item.role, "content": item.content} for item in (history or [])
+    )
+    context.append({"role": "user", "content": message})
     return await llm.generate_structured(
-        messages=[
-            {"role": "system", "content": CLASSIFIER_SYSTEM_PROMPT},
-            {"role": "user", "content": message},
-        ],
+        messages=context,
         response_model=IntentClassification,
         temperature=0.0,
     )

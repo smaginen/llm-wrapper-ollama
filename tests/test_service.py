@@ -69,7 +69,11 @@ async def test_only_latest_history_messages_are_rendered() -> None:
 
     await wrapper.handle(WrapperRequest(message="Что делать дальше?", history=history))
 
+    classifier_messages = llm.calls[0]["messages"]
     answer_prompt = llm.calls[1]["messages"][0]["content"]
+    assert all(item["content"] != "старое сообщение" for item in classifier_messages)
+    assert any(item["content"] == "предыдущий ответ" for item in classifier_messages)
+    assert any(item["content"] == "актуальное уточнение" for item in classifier_messages)
     assert "старое сообщение" not in answer_prompt
     assert "предыдущий ответ" in answer_prompt
     assert "актуальное уточнение" in answer_prompt

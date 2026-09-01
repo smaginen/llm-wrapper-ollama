@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import deque
 from typing import Any
 
-from app.ports import ResponseModel
+from app.ports import LLMMessage, ResponseModel
 
 
 class FakeLLM:
@@ -16,7 +16,7 @@ class FakeLLM:
     async def generate_structured(
         self,
         *,
-        messages: list[dict[str, str]],
+        messages: list[LLMMessage],
         response_model: type[ResponseModel],
         temperature: float = 0.0,
     ) -> ResponseModel:
